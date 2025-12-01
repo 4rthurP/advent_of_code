@@ -1,0 +1,63 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "aoc"
+version = "0.0.1"
+description = "A CLI tool for package installation and configuration management"
+readme = "README.md"
+requires-python = ">=3.14"
+
+dependencies = [
+    "rich>=14.2.0",
+    "typer>=0.20.0",
+]
+
+[project.optional-dependencies]
+dev = [
+]
+
+[project.scripts]
+aoc = "aoc.main:app"
+
+[tool.ruff.lint]
+extend-select = [
+    "RUF",
+    "COM",
+    "Q",
+    "UP",
+    "I",
+    "PERF",
+    "N",
+    "FLY",
+    "PTH",
+    "TC",
+    "SIM",
+    "RET",
+    "FIX",
+    "C4",
+    "B",
+    "ASYNC",
+    "ANN001",
+]
+
+ignore = [
+    "COM812",
+]
+
+exclude = [
+    ".venv",
+    ".git",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14.7",
+]
