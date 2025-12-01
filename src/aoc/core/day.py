@@ -30,7 +30,7 @@ class AOCDay:
 
     def load_puzzles(self):
         self.puzzles = []
-        for n in range(1, self.n_parts):
+        for n in range(1, self.n_parts + 1):
             loader_response, success = self._load_class(n)
 
             if not success:
