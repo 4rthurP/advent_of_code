@@ -1,5 +1,3 @@
-from rich.console import Console
-
 from aoc.core.puzzle import AOCPuzzle
 
 
@@ -10,7 +8,7 @@ class AOC2025Day1Part2(AOCPuzzle):
         answer = 0
         counter = 50
         for line in self.input_path.open("r"):
-            amount = int(line[1:len(line)])
+            amount = int(line[1 : len(line)])
 
             while amount > 0:
                 if counter == 0 and amount >= 100:

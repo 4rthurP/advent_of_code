@@ -1,20 +1,18 @@
-from rich.console import Console
-
 from aoc.core.puzzle import AOCPuzzle
 
 
 class AOC2025Day1Part1(AOCPuzzle):
     answer = 995
+
     def solve(self):
-        console = Console()
         answer = 0
         counter = 50
         for line in self.input_path.open("r"):
-            amount = int(line[1:len(line)])%100
+            amount = int(line[1 : len(line)]) % 100
             if amount > 100:
                 raise ValueError(f"Amount must be between 1 and 100: {amount}")
 
-            match(line[0]):
+            match line[0]:
                 case "R":
                     counter += amount
                 case "L":
