@@ -1,12 +1,11 @@
-from rich.console import Console
-
 from aoc.core.puzzle import AOCPuzzle
 
 
 class AOC2025DayXPartX(AOCPuzzle):
+    verbose_output = True
+
     def solve(self):
-        console = Console()
         input = self.input
-        console.print(input)
-        
+        self.log(input)
+
         return "answer"

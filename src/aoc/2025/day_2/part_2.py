@@ -2,7 +2,6 @@ from aoc.core.puzzle import AOCPuzzle
 
 
 class AOC2025Day2Part1(AOCPuzzle):
-    verbose_output = False
     answer = 36862281418
 
     def solve(self):

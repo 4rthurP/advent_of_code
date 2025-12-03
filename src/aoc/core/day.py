@@ -58,7 +58,7 @@ class AOCDay:
         console.print("---------------------------")
         console.print(f"Day {self.day} of {self.year}")
         for puzzle in self.puzzles:
-            console.print(f"Solving part {puzzle.part} of {self.day}")
+            console.print(f"Solving part {puzzle.part} of Day {self.day}")
             puzzle.solve_puzzle()
             match puzzle.state:
                 case PuzzleState.UNKNOWN:

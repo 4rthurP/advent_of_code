@@ -24,7 +24,7 @@ class AOCPuzzle:
     answer: any | None = None
     given_answer: any | None = None
     timer: int | None = None
-    verbose_output: bool = True
+    verbose_output: bool = False
 
     def __init__(self, year: int, day: int, part: int):
         self.year = year or os.environ["CURRENT_YEAR"]
@@ -36,7 +36,7 @@ class AOCPuzzle:
             Path(__file__).parent.parent
             / str(self.year)
             / "inputs"
-            / f"day_{self.day}_part_{self.part}.txt"
+            / f"day_{self.day}.txt"
         )
 
         self.define_logger()
@@ -51,6 +51,9 @@ class AOCPuzzle:
     @property
     def has_input(self):
         return self.input_path.exists()
+    
+    def read_input(self):
+        return self.input_path.open("r")
 
     def solve_puzzle(self):
         self.log("------------------------------------")
