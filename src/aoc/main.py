@@ -6,6 +6,7 @@ from typing import Annotated
 import typer
 from rich.console import Console
 
+import aoc.services as services
 from aoc.core.day import AOCDay
 
 console = Console()
@@ -31,6 +32,25 @@ def aoc(
         console.print(f"[red]❌ {aoc.error_msg}[/red]")
 
     aoc.solve()
+
+
+@app.command("create")
+def create(
+    day: Annotated[int, typer.Argument(help="Day of the AoC puzzle")],
+    n_parts: Annotated[
+        int, typer.Option("--parts", "-p", help="Number of parts to create")
+    ] = 2,
+    *,
+    year: Annotated[
+        int | None, typer.Option("--year", "-y", help="Year of the AoC puzzle")
+    ] = None,
+) -> None:
+    """Create the structure for a new AOC puzzle."""
+    response, message = services.create_aoc_puzzle(day, year, n_parts)
+    if response:
+        console.print(f"[green]✅ {message}[/green]")
+    else:
+        console.print(f"[red]❌ {message}[/red]")
 
 
 @app.callback()

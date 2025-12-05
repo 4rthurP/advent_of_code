@@ -10,6 +10,7 @@ readme = "README.md"
 requires-python = ">=3.14"
 
 dependencies = [
+    "polars>=1.35.2",
     "rich>=14.2.0",
     "typer>=0.20.0",
 ]
