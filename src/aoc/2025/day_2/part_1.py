@@ -3,6 +3,7 @@ from aoc.core.puzzle import AOCPuzzle
 
 class AOC2025Day2Part1(AOCPuzzle):
     answer: int = 19605500130
+    example_anwser = 1227775554
 
     def solve(self):
         input = self.input

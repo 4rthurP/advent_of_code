@@ -3,6 +3,7 @@ from aoc.core.puzzle import AOCPuzzle
 
 class AOC2025Day2Part1(AOCPuzzle):
     answer = 36862281418
+    example_anwser = 36862281418
 
     def solve(self):
         input = self.input
@@ -12,7 +13,7 @@ class AOC2025Day2Part1(AOCPuzzle):
             id_range = segment.split("-")
             start = int(id_range[0])
             end = int(id_range[1])
-            
+
             start_size, end_size = self.get_size(start, end)
             # Process all sizes in the range, for example 777 - 5776 would need to find incorrect ids of sizes 3 and 4
             size_range = range(start_size, end_size + 1)

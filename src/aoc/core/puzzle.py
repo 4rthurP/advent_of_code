@@ -11,7 +11,9 @@ class PuzzleState(StrEnum):
     NOT_STARTED = "not_started"
     UNKNOWN = "unknown"
     SOLVED = "solved"
+    SOLVED_EXAMPLE = "solved example"
     FAILED = "failed"
+    FAILED_EXAMPLE = "failed example"
 
 
 class AOCPuzzle:
@@ -21,10 +23,15 @@ class AOCPuzzle:
     error_message: str
     solve_message: str = "Puzzle solved !"
     state: PuzzleState
-    answer: any | None = None
-    given_answer: any | None = None
     timer: int | None = None
     verbose_output: bool = False
+
+    # Puzzle answer
+    answer: any | None = None
+    given_answer: any | None = None
+    # Example answer
+    example_answer: any | None = None
+    given_example_answer: any | None = None
 
     def __init__(self, year: int, day: int, part: int):
         self.year = year or os.environ["CURRENT_YEAR"]
@@ -32,12 +39,13 @@ class AOCPuzzle:
         self.part = part
 
         self.input_value = None
-        self.input_path = (
+        inputs_folder = (
             Path(__file__).parent.parent
             / str(self.year)
             / "inputs"
-            / f"day_{self.day}.txt"
         )
+        self.input_path = inputs_folder / f"day_{self.day}.txt"
+        self.input_example_path = inputs_folder / f"day_{self.day}_example.txt"
 
         self.define_logger()
 
@@ -64,7 +72,16 @@ class AOCPuzzle:
         self.timer = time.time() - timer_start
 
         self.log(f"Puzzle solved in {self.timer:.4f}s")
+
+        if self.answer is None and self.example_answer is not None:
+            self.input_path = self.input_example_path
+            self.input_value = None
+
+            # Solve the puzzle using the example input
+            self.given_example_answer = self.solve()
+
         self.check_answer()
+
         return self.state
 
     def solve(self) -> any:
@@ -72,6 +89,12 @@ class AOCPuzzle:
 
     def check_answer(self):
         if self.answer is None:
+            if self.example_answer is not None:
+                if self.given_example_answer == self.example_answer:
+                    self.state = PuzzleState.SOLVED_EXAMPLE
+                    return
+                self.state = PuzzleState.FAILED_EXAMPLE
+                return
             self.state = PuzzleState.UNKNOWN
             return
         if self.answer == self.given_answer:

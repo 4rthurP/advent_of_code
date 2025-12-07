@@ -73,6 +73,20 @@ class AOCDay:
                     console.print(
                         f"[red]Unfortunatly, {puzzle.given_answer} is not the right answer for part {puzzle.part} ![/red]"
                     )
+                case PuzzleState.SOLVED_EXAMPLE:
+                    console.print(
+                        f"[green]Correct on example input ! {puzzle.given_example_answer} was the right answer for part {puzzle.part} ![/green]"
+                    )
+                    console.print(
+                        f"[yellow]Answer given for part {puzzle.part}: {puzzle.given_answer}[/yellow]"
+                    )
+                case PuzzleState.FAILED_EXAMPLE:
+                    console.print(
+                        f"[red]Unfortunatly, {puzzle.given_example_answer} is not the right answer for part {puzzle.part} on example input (expected {puzzle.example_answer}) ![/red]"
+                    )
+                    console.print(
+                        f"[red]Answer given for part {puzzle.part}: {puzzle.given_answer}[/red]"
+                    )
                 case _:
                     console.print(
                         f"[red]An unknown error happened while solving par {puzzle.part} ![/red]"

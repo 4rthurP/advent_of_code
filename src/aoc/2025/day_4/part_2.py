@@ -4,6 +4,7 @@ from aoc.core.puzzle import AOCPuzzle
 class AOC2025DayXPartX(AOCPuzzle):
     # verbose_output = True
     answer = 9173
+    example_answer = 43
 
     def solve(self):
         answer = 0

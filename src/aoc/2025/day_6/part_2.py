@@ -7,6 +7,7 @@ from aoc.core.puzzle import AOCPuzzle
 class AOC2025Day6Part2(AOCPuzzle):
     #verbose_output = True
     answer = 10194584711842
+    example_answer = 3263827
 
     def solve(self):
         input = self.input

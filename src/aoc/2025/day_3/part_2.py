@@ -3,6 +3,8 @@ from aoc.core.puzzle import AOCPuzzle
 
 class AOC2025Day3Part1(AOCPuzzle):
     answer = 169935154100102
+    example_answer = 3121910778619
+
     def solve(self):
         answer = 0
 
@@ -10,7 +12,7 @@ class AOC2025Day3Part1(AOCPuzzle):
             answer += self.get_line_answer(line, 12)
 
         return answer
-    
+
     def get_line_answer(self, line: str, target_lenght: int):
         line = line.strip()
 

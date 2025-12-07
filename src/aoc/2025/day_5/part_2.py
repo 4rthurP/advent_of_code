@@ -4,8 +4,9 @@ from aoc.core.puzzle import AOCPuzzle
 
 
 class AOC2025Day5Part2(AOCPuzzle):
-    verbose_output = True
+    #verbose_output = True
     answer = 348820208020395
+    example_answer = 14
 
     def solve(self):
         return self.polars()

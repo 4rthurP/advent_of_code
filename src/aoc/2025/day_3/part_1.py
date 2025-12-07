@@ -3,6 +3,8 @@ from aoc.core.puzzle import AOCPuzzle
 
 class AOC2025Day3Part1(AOCPuzzle):
     answer = 17142
+    example_answer = 17142
+
     def solve(self):
         answer = 0
 
@@ -10,7 +12,7 @@ class AOC2025Day3Part1(AOCPuzzle):
             answer += self.get_line_answer(line)
 
         return answer
-    
+
     def get_line_answer(self, line: str):
         max_num = (0, 0)
         min_num = (0, 0)
