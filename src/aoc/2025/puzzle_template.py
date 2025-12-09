@@ -1,14 +1,15 @@
-from aoc.core.puzzle import AOCPuzzle
+from .commons import AOC2025DayX
 
 
-class AOC2025DayXPartX(AOCPuzzle):
+class AOC2025DayXPartX(AOC2025DayX):
     verbose_output = True
     #answer = 0
     example_answer = 0
 
     def solve(self):
         input = self.input
-        self.log(input)
         answer = 0
+        
+        self.log(input)
 
         return answer

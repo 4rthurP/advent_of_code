@@ -14,11 +14,23 @@ def create_aoc_puzzle(day: int, year: int | None = None, parts: int = 2) -> tupl
         return False, "Year folder does not exist."
 
     template_file = year_folder / "puzzle_template.py"
+    commons_template_file = year_folder / "commons.py"
 
-    if not template_file.exists():
+    if not template_file.exists() or not commons_template_file.exists():
         return False, "Template file does not exist."
 
     puzzle_folder.mkdir(exist_ok=True)
+
+    # Copy commons (day) template
+    commons_file = puzzle_folder / "commons.py"
+    if not commons_file.exists():
+        with commons_template_file.open("r") as template:
+            template_content = template.read()
+
+        commons_content = template_content.replace("DayX", f"Day{day}")
+
+        with commons_file.open("w") as commons:
+            commons.write(commons_content)
 
     # Copy template for each part
     for part in range(1, parts + 1):
