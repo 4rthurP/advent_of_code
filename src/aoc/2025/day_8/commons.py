@@ -1,0 +1,103 @@
+import re
+
+from aoc.core.puzzle import AOCPuzzle
+
+
+class Circuit:
+    x: float
+    y: float
+    z: float
+
+    def __init__(self, position: str):
+        position = re.sub(r"\s", "", position)
+        self.position = position
+
+        coordinates = position.split(",")
+        self.x = int(coordinates[0])
+        self.y = int(coordinates[1])
+        self.z = int(coordinates[2])
+
+    def distance(self, other_circuit: Circuit) -> int:
+        return (
+            (self.x - other_circuit.x) ** 2
+            + (self.y - other_circuit.y) ** 2
+            + (self.z - other_circuit.z) ** 2
+        )
+
+    def __repr__(self):
+        return f"x: {self.x} - y: {self.y} - z: {self.z}"
+
+
+class AOC2025Day(AOCPuzzle):
+    latest_circuit_id: int = 0
+    plugged_circuits: dict
+
+    def fetch_circuits_positions(self) -> list[Circuit]:
+        circuits = [Circuit(coordinates) for coordinates in self.read_input()]
+        self.log(f"Found {len(circuits)} circuits")
+        return circuits
+
+    def find_circuits_distances(
+        self,
+        circuits: list[Circuit],
+    ) -> tuple[list[int], tuple[Circuit, Circuit]]:
+        distances = []
+        circuits_pairs = {}
+
+        for i in range(0, len(circuits)):
+            for j in range(i + 1, len(circuits)):
+                distance = circuits[i].distance(circuits[j])
+                distances.append(distance)
+                circuits_pairs[distance] = (circuits[i], circuits[j])
+
+        distances.sort()
+        return distances, circuits_pairs
+
+    def plug_circuits(self, circuits_pair: tuple[Circuit, Circuit]):
+        circuit_a = None
+        circuit_a_position = circuits_pair[0].position
+        if circuit_a_position in self.plugged_circuits:
+            circuit_a = self.plugged_circuits[circuit_a_position]
+
+        circuit_b = None
+        circuit_b_position = circuits_pair[1].position
+        if circuit_b_position in self.plugged_circuits:
+            circuit_b = self.plugged_circuits[circuit_b_position]
+
+        if circuit_a is None and circuit_b is None:
+            self.latest_circuit_id += 1
+            self.plugged_circuits[circuit_a_position] = self.latest_circuit_id
+            self.plugged_circuits[circuit_b_position] = self.latest_circuit_id
+            return
+
+        if circuit_b is None:
+            self.plugged_circuits[circuit_b_position] = circuit_a
+            return
+        if circuit_a is None:
+            self.plugged_circuits[circuit_a_position] = circuit_b
+            return
+
+        if circuit_a == circuit_b:
+            return
+
+        self.replace_circuits_ids(circuit_a, circuit_b)
+
+    def replace_circuits_ids(self, circuit_a: int, circuit_b: int):
+        plugged_circuits = self.plugged_circuits
+        for circuit, id in plugged_circuits.items():
+            if id != circuit_b:
+                continue
+            self.plugged_circuits[circuit] = circuit_a
+
+    def count_plugs(self):
+        counts = {}
+        for circuit_id in self.plugged_circuits.values():
+            if circuit_id in counts:
+                counts[circuit_id] += 1
+                continue
+            counts[circuit_id] = 1
+
+        counts = list(counts.values())
+        counts.sort(reverse=True)
+
+        return counts
