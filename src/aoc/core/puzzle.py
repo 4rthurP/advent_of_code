@@ -25,6 +25,9 @@ class AOCPuzzle:
     state: PuzzleState
     timer: int | None = None
     verbose_output: bool = False
+    skip_puzzle: bool = False # Activate to only solve the exemple, useful for debugging
+    solving_puzzle: bool = False
+    solving_example: bool = False
 
     # Puzzle answer
     answer: any | None = None
@@ -66,19 +69,29 @@ class AOCPuzzle:
     def solve_puzzle(self):
         self.log("------------------------------------")
         self.log(f"Started solving Part {self.part} of Day {self.day} {self.year}")
+        self.timer = 0
 
-        timer_start = time.time()
-        self.given_answer = self.solve()
-        self.timer = time.time() - timer_start
+        # Solve main puzzle
+        if not self.skip_puzzle:
+            self.solving_puzzle = True
+            timer_start = time.time()
+            self.given_answer = self.solve()
+            self.timer = time.time() - timer_start
 
-        self.log(f"Puzzle solved in {self.timer:.4f}s")
+            self.log(f"Puzzle solved in {self.timer:.4f}s")
+            self.solving_puzzle = False
 
+        # Switch input to solve example if the real answer has not been found yet
         if self.answer is None and self.example_answer is not None:
-            self.input_path = self.input_example_path
-            self.input_value = None
+            self.solving_example = True
+            # Even though the input property could handle the "solving_example" property, 
+            # switching the input path directly allows to use this property directly in the puzzle without having to worry about the switch
+            self.input_path = self.input_example_path 
+            self.input_value = None # Reset the previous value loaded by the puzzle solving
 
             # Solve the puzzle using the example input
             self.given_example_answer = self.solve()
+            self.solving_example = False
 
         self.check_answer()
 
