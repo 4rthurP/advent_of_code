@@ -58,29 +58,60 @@ class LinearEquationsSystem:
         self.solve_time = time.time() - start_time
         self.is_solved = True
         return self.solutions
-    
-    def order(self):
-        current_shape = []
 
+    @property
+    def is_echelonned(self):
+        for i in range(0, self.n):
+            if self.current_form[i][i]:
+                return False
 
-    def reshape(self)
-        "Order by number of leading zeros."
-        order = {}
-        for line in self.current_form:
-            leading_zeros = 0
-            for n in line:
-                if n != 0:
-                    break
-                leading_zeros += 1
-            if leading_zeros not in order:
-                order[leading_zeros] = []
-            order[leading_zeros].append(line)
+        return True
 
-        self.current_form = [*order]
-                
+    def shape(self):
+        "Recursively shapes the matrix toward a row echelon"
+        col = 0
+        last_system = []
+        systems = self.current_form
 
-                
-        pass
+        for row in range(0, self.n):
+            system = systems[row]
+            # Find the next pivot column
+            if system[col] == 0:
+                col += 1
+            for inner_row in range(row, self.n + 1):
+                # Next system is already reduced
+                if systems[inner_row][col] == 0:
+                    continue
+
+                # Reduce the biggest system and order systems with smallest on top
+                system, new_system = self._reduce_system(col, systems[inner_row], system)
+                systems[row] == system
+                systems[inner_row] = new_system
+
+        self.current_form = systems
+        if not self.is_echelonned:
+            self.order()
+            self.shape()
+
+    def _reduce_system(self, col: int, current_system: list[int], previous_system: list[int]) -> tuple[list[int], list[int]]:
+        if current_system[col] < previous_system[col]:
+            small_system = current_system
+            big_system = previous_system
+        else:
+            small_system = previous_system
+            big_system = current_system
+
+        if big_system[col] % small_system[col] != 0:
+            return small_system, big_system
+
+        factor = big_system[col] / small_system[col]
+
+        new_system = []
+        for i in range(0, len(current_system)):
+            new_system[i] = big_system[i] - factor * small_system[i]
+
+        return small_system, big_system
+
 
     def reduce(self):
         pass
