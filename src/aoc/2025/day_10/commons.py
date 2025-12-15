@@ -138,6 +138,20 @@ class Machine:
 
         return self.lights.is_lit
     
+    def apply_science(self):
+        codex = []
+        # Each joltage level equates to one system of equation for a given joltage counter
+        for i in range(0, self.n_lights):
+            # Each system will track if the button triggers the joltage counter or not
+            system = [1 if button.targets(i) else 0 for button in self.buttons]
+            # And the number of times the joltage counter needs to be triggered
+            system.append(self.joltage.jolts_target[i])
+
+            codex.append(system)
+
+        return codex
+
+    
     def run_bj2o(self):
         "Buttons-Joltage Optimization Operation"
 

@@ -3,6 +3,8 @@ import asyncio
 from functools import cache
 from itertools import batched, permutations
 
+from aoc.commons.linear_equations import LinearEquationsSystem
+
 from .commons import AOC2025Day10, Button, Machine
 
 
@@ -10,10 +12,37 @@ class AOC2025Day10Part2(AOC2025Day10):
     verbose_output = True
     #answer = 0
     example_answer = 33
-    # skip_puzzle = True
+    skip_puzzle = True
 
     def solve(self):
-        return asyncio.run(self.helping_the_elfes())
+        for instructions in self.read_input():
+            machine = Machine(instructions)
+
+            # Create eq systems 
+            machine_code = machine.apply_science()
+            self.log(machine_code)
+
+            # Reduce to echelon form
+                # ???
+
+            # Back substitute
+
+            # Loop through systems to 
+            # - find free variables (replace line by 0 ?)
+            # - find solved unknowns
+
+            # If solved return solution
+            # If one free variable ???
+
+            # For each free variables
+            # Express other variables in terms of free variables (n column matrixes) and find min/max
+            # Loop through remaining possibilities starting from 0 and stop when one is found
+            # Look for the smallest solution between all free variable
+
+            # Return result
+
+            break
+        # return asyncio.run(self.helping_the_elfes())
 
     async def helping_the_elfes(self) -> int:
         n_pushes = 0
