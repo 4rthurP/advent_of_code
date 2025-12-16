@@ -3,7 +3,43 @@ import re
 
 from aoc.core.puzzle import AOCPuzzle
 
+class System:
+    system: list[float]
+    non_leading_zero: int | None
+    solution
 
+    def __init__(self, system: list[float]):
+        self.system = system
+
+    def __repr__(self):
+        return f"System {self.system}"
+    
+    def __getitem__(self, index: int):
+        return self.system[index]
+    
+    def __iter__(self):
+        return iter(self.system)
+    
+    def __len__(self):
+        return len(self.system)
+    
+    def find_non_leading_zero(self):
+        for col, n in enumerate(self.system):
+            if n != 0:
+                self.non_leading_zero = col
+                return
+            
+        self.non_leading_zero = None
+    
+    def reduce(self, reference: System):
+        if reference.non_leading_zero is None:
+            return
+        factor = self.system[reference.non_leading_zero] / reference[reference.non_leading_zero]
+                
+        for i in range(0, len(reference)):
+            self[i] - factor * reference[i]
+
+        self.find_non_leading_zero()
 class Light:
     n: int
     target: list[bool]
