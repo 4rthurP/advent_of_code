@@ -95,7 +95,7 @@ class System:
                 return None
 
         # We can give a solution
-        self.solution = self[-1] / self[self.non_leading_zero]
+        self.solution = round(self[-1] / self[self.non_leading_zero])
         return self.solution
 
     def reduce(self, reference: System):
@@ -122,6 +122,8 @@ class System:
         for variable in free_variables_presses:
             total -= self[variable] * free_variables_presses[variable]
 
+        if math.isclose(total, 0, abs_tol=0.01):
+            total = 0
         if total < 0:
             return None
 
@@ -172,6 +174,7 @@ class Button:
     def __init__(self, button_instruction: str):
         self.buttons = [int(button) for button in button_instruction.split(",")]
         self.max_joltage_presses = None
+        self.solution = None
 
     def __repr__(self):
         return f"Button targets {self.buttons}. !! Do not press more than {self.max_joltage_presses} times, machine breakage risk !!"
@@ -316,6 +319,7 @@ class Machine:
         "Recursively shapes the matrix toward a row echelon"
         # Register the max number of presses for each button
         for i, button in enumerate(self.buttons):
+            # button.set_max_presses(self.joltage.maximum_joltage())
             for system in self.codex:
                 if system[i] != 0:
                     button.set_max_presses(system.joltage)
@@ -424,7 +428,13 @@ class Machine:
                 button_presses[system.non_leading_zero] = buttons_pressed
 
                 # Remove invalid scenarii
-                if buttons_pressed is None or not is_almost_integral(buttons_pressed, tolerance=0.01):
+                if buttons_pressed is None:
+                    # self.console.print(f"Found None button presse  with {button_presses} for {system} with {variables_presses}")
+                    n_presses = None
+                    break
+
+                if not is_almost_integral(buttons_pressed, tolerance=0.01):
+                    # self.console.print(f"Found non interger buttons presses {buttons_pressed} with {button_presses} and {n_presses} for {system} with {variables_presses}")
                     n_presses = None
                     break
 
@@ -439,6 +449,7 @@ class Machine:
 
             # DEBUG: process the  number of presses per button and compare to the original systems in debug_systems
             dbg_systems = [system.copy() for system in self.debug_systems]
+            # self.console.print(dbg_systems)
             for i, button in enumerate(self.buttons):
                 if i in button_presses:
                     presses = button_presses[i]
@@ -453,7 +464,7 @@ class Machine:
             for system in dbg_systems:
                 if not is_almost_integral(system[-1], tolerance=0.01):
                     raise ValueError("Inconsistent system after applying presses.")
-
+            # self.console.print(dbg_systems)
             if answer is None:
                 answer = n_presses
 
@@ -461,10 +472,10 @@ class Machine:
                 answer = n_presses
 
 
-        if answer != max_joltage:
-            self.console.print(self.debug_systems)
-            self.console.print(self.codex)
-            self.console.print(f"{answer} vs {max_joltage}")
+        # if answer != max_joltage:
+        #     self.console.print(self.debug_systems)
+        #     self.console.print(self.codex)
+        #     self.console.print(f"{answer} vs {max_joltage}")
         return answer
 
     async def frame_free_variables(self):
