@@ -259,7 +259,6 @@ class Machine:
     codex: list[System]
     free_variables: list[int]
     n_solutions: int = 0
-    n_min_presses: int = 0
 
     def __init__(self, instructions: str):
         self.lights = Light(re.search(r"\[([^\]]+)\]", instructions).group(1))  # ty:ignore[possibly-missing-attribute]
@@ -320,8 +319,6 @@ class Machine:
             for system in self.codex:
                 if system[i] != 0:
                     button.set_max_presses(system.joltage)
-                if system.joltage > self.n_min_presses:
-                    self.n_min_presses = system.joltage
 
         for row in range(0, len(self.codex)):
             system = self.codex[row]
@@ -348,7 +345,7 @@ class Machine:
             if system_a.non_leading_zero < system_b.non_leading_zero:
                 return system_a, system_b
             return system_b, system_a
-        
+
         small_system = system_b
         big_system = system_a
         # Find the system to keep at the top and the one to reduce
@@ -370,7 +367,7 @@ class Machine:
         #     return system_a, system_b
         # if system_a.non_leading_zero is None:
         #     return system_b, system_a
-            
+
 
         # system_b.reduce(system_a)
         # return system_a, system_b
@@ -419,10 +416,12 @@ class Machine:
             variables_presses = {
                 var: presses[i] for i, var in enumerate(self.free_variables)
             }
-
+            
+            button_presses = {}
             n_presses = sum(presses)
             for system in self.codex:
                 buttons_pressed = system.count_presses(variables_presses) 
+                button_presses[system.non_leading_zero] = buttons_pressed
 
                 # Remove invalid scenarii
                 if buttons_pressed is None or not is_almost_integral(buttons_pressed, tolerance=0.01):
@@ -430,22 +429,37 @@ class Machine:
                     break
 
                 n_presses += round(buttons_pressed)
-                    
-                
-            if n_presses is None:
+
+
+            if n_presses is None or n_presses < 0 or n_presses < max_joltage:
                 continue
-            if n_presses < 0 or n_presses < max_joltage:
-                self.console.print(f"Found invalid number of presses {n_presses} with {presses} ({max_joltage})")
-                continue
-            
+
             if n_presses == max_joltage:
                 return n_presses
+
+            # DEBUG: process the  number of presses per button and compare to the original systems in debug_systems
+            dbg_systems = [system.copy() for system in self.debug_systems]
+            for i, button in enumerate(self.buttons):
+                if i in button_presses:
+                    presses = button_presses[i]
+                else:
+                    presses = variables_presses[i]
+                
+                for system_index, system in enumerate(dbg_systems):
+                    if system[i] != 0:
+                        system[-1] -= system[i] * presses
+                        system[i] = 0
+            
+            for system in dbg_systems:
+                if not is_almost_integral(system[-1], tolerance=0.01):
+                    raise ValueError("Inconsistent system after applying presses.")
+
             if answer is None:
                 answer = n_presses
-                    
+
             if n_presses < answer:
                 answer = n_presses
-                    
+
 
         if answer != max_joltage:
             self.console.print(self.debug_systems)
