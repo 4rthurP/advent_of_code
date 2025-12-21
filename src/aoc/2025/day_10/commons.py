@@ -1,11 +1,8 @@
-from multiprocessing import Value
 import math
 import re
 from itertools import product
-from math import floor, ceil
+from math import ceil, floor
 from typing import TYPE_CHECKING
-
-from rich.console import Console
 
 from aoc.commons.maths import is_almost_integral
 from aoc.core.puzzle import AOCPuzzle
@@ -38,35 +35,25 @@ class System:
 
     def __len__(self):
         return len(self.system)
-    
+
     def __add__(self, value: float | System):
         if isinstance(value, System):
-            self.system = [
-                var + value[i] for i, var in enumerate(self.system)
-            ]
+            self.system = [var + value[i] for i, var in enumerate(self.system)]
             return self
 
-        self.system = [
-            var + value for var in self.system
-        ]
+        self.system = [var + value for var in self.system]
         return self
-    
+
     def __sub__(self, value: float | System):
         if isinstance(value, System):
-            self.system = [
-                var - value[i] for i, var in enumerate(self.system)
-            ]
+            self.system = [var - value[i] for i, var in enumerate(self.system)]
             return self
 
-        self.system = [
-            var - value for var in self.system
-        ]
+        self.system = [var - value for var in self.system]
         return self
-    
+
     def __mul__(self, value: float):
-        self.system = [
-            var * value for var in self.system
-        ]
+        self.system = [var * value for var in self.system]
         return self
 
     @property
@@ -84,6 +71,19 @@ class System:
 
         self.non_leading_zero = None
 
+    def reduce(self, reference: System):
+        if reference.non_leading_zero is None:
+            return
+        factor = (
+            self.system[reference.non_leading_zero]
+            / reference[reference.non_leading_zero]
+        )
+
+        for i in range(0, len(reference)):
+            self[i] -= factor * reference[i]
+
+        self.find_non_leading_zero()
+
     def find_solution(self):
         # It's a free variable
         if self.non_leading_zero is None:
@@ -97,19 +97,6 @@ class System:
         # We can give a solution
         self.solution = round(self[-1] / self[self.non_leading_zero])
         return self.solution
-
-    def reduce(self, reference: System):
-        if reference.non_leading_zero is None:
-            return
-        factor = (
-            self.system[reference.non_leading_zero]
-            / reference[reference.non_leading_zero]
-        )
-
-        for i in range(0, len(reference)):
-            self[i] -= factor * reference[i]
-
-        self.find_non_leading_zero()
 
     def count_presses(self, free_variables_presses: dict[int, int]) -> int | None:
         if self.solution is not None:
@@ -192,6 +179,9 @@ class Button:
     def targets(self, position: int):
         return position in self.buttons
 
+    def press(self, n_presses: int = 1):
+        return self.buttons if n_presses % 2 == 1 else [0]
+
     def set_max_presses(self, n: int):
         "Keep the minimum value given to make sure a button is not pressed too many times."
         if n < 0:
@@ -205,25 +195,6 @@ class Button:
             return
         self.min_joltage_presses = n
 
-    def optimize_presses(
-        self, jolts_target: list[int], current_state: list[int], finger_endurance: int
-    ) -> tuple[int, int]:
-        biggest_press = 0
-        max_press: int = self.max_joltage_presses or 999
-
-        for position in self.buttons:
-            joltage_difference = jolts_target[position] - current_state[position]
-            max_press = min(joltage_difference, max_press)
-            biggest_press = max(joltage_difference, biggest_press)
-
-        min_press = biggest_press - finger_endurance
-        min_press = min_press if min_press > 0 else 0
-
-        return min_press, max_press + 1
-
-    def press(self, n_presses: int = 1):
-        return self.buttons if n_presses % 2 == 1 else [0]
-
 
 class JoltageIndicator:
     n_indicators: int
@@ -235,18 +206,9 @@ class JoltageIndicator:
 
     def __repr__(self):
         return f"Jolts target {self.jolts_target}"
-    
+
     def __len__(self):
         return len(self.jolts_target)
-
-    def charge(
-        self, current_charge: list[int], positions: list[int], joltage_applied: int
-    ):
-        new_charge = current_charge.copy()
-        for indicator in positions:
-            new_charge[indicator] += joltage_applied
-
-        return new_charge
 
     def maximum_joltage(self):
         return max(self.jolts_target)
@@ -256,9 +218,7 @@ class Machine:
     lights: Light
     buttons: list[Button]
     joltage: JoltageIndicator
-    job: list[
-        Button
-    ]  # Joltage-Optimized Buttons are sorted according to the maximum number of times they can be pressed
+
     codex: list[System]
     free_variables: list[int]
     n_solutions: int = 0
@@ -269,7 +229,6 @@ class Machine:
             re.search(r"\{([^}]+)\}", instructions).group(1)  # ty:ignore[possibly-missing-attribute]
         )
 
-        self.console = Console()
         self.buttons = []
         for match in re.findall(r"\(([^)]+)\)", instructions):
             self.buttons.append(Button(match))
@@ -293,7 +252,7 @@ class Machine:
     def lights_state(self):
         return self.lights.state
 
-    def test_buttons(self, buttons_sequence: list) -> bool:
+    def play_with_buttons(self, buttons_sequence: list) -> bool:
         self.lights.reset()
         for button_position in buttons_sequence:
             self.lights.switch_lights(self.buttons[button_position].press())
@@ -315,18 +274,17 @@ class Machine:
 
         self.codex = codex
 
-    async def reduce_systems(self):
-        "Recursively shapes the matrix toward a row echelon"
-        # Register the max number of presses for each button
+    async def bop_it(self):
+        "Button Optimization Procedure - Register the max number of presses for each button"
         for i, button in enumerate(self.buttons):
-            # button.set_max_presses(self.joltage.maximum_joltage())
             for system in self.codex:
                 if system[i] != 0:
                     button.set_max_presses(system.joltage)
 
+    async def activate_drs(self):
+        "Drastik Reduction System - Recursively shapes the matrix toward a row echelon"
         for row in range(0, len(self.codex)):
             system = self.codex[row]
-            # Reduce the biggest system and order systems with biggest on top
             for inner_row in range(row + 1, len(self.codex)):
                 system, new_system = await self._reduce(self.codex[inner_row], system)
                 self.codex[row] = system
@@ -367,16 +325,9 @@ class Machine:
 
         small_system.reduce(big_system)
         return big_system, small_system
-        # if system_b.non_leading_zero is None:
-        #     return system_a, system_b
-        # if system_a.non_leading_zero is None:
-        #     return system_b, system_a
 
-
-        # system_b.reduce(system_a)
-        # return system_a, system_b
-
-    async def back_substitute(self):
+    async def use_bts(self):
+        "Back Template Substitution - Back substitutes lower ranks rows in all rows above."
         for i, reference in enumerate(self.codex):
             # Empty systems
             if reference.non_leading_zero is None:
@@ -391,15 +342,16 @@ class Machine:
 
             # Reduce other systems using this one
             for system in self.codex[:i]:
-                if system[reference.non_leading_zero] == 0:
+                if system[reference.non_leading_zero] == 0:  # ty:ignore[invalid-argument-type]
                     continue
                 system.reduce(reference)
 
+    async def holmes_protocole(self):
+        "Hyper Overly Laborious and Meticulous Equation Solver - Pass through each system to see if they have a solution"
         for system in self.codex:
             if system.non_leading_zero is None:
                 continue
             button = self.buttons[system.non_leading_zero]
-            # Check if this system has a solution and register dependant variables
             button.solution = system.find_solution()
             if button.has_solution:
                 self.n_solutions += 1
@@ -408,78 +360,8 @@ class Machine:
             i for i, button in enumerate(self.buttons) if button.is_free_variable
         ]
 
-    async def solve(self):
-        await self.frame_free_variables()
-        if len(self.free_variables) == 0:
-            return round(sum([button.solution for button in self.buttons]))
-
-        max_joltage = self.joltage.maximum_joltage()
-        answer = None
-
-        for presses in self.enumerate_free_variables_presses():
-            variables_presses = {
-                var: presses[i] for i, var in enumerate(self.free_variables)
-            }
-            
-            button_presses = {}
-            n_presses = sum(presses)
-            for system in self.codex:
-                buttons_pressed = system.count_presses(variables_presses) 
-                button_presses[system.non_leading_zero] = buttons_pressed
-
-                # Remove invalid scenarii
-                if buttons_pressed is None:
-                    # self.console.print(f"Found None button presse  with {button_presses} for {system} with {variables_presses}")
-                    n_presses = None
-                    break
-
-                if not is_almost_integral(buttons_pressed, tolerance=0.01):
-                    # self.console.print(f"Found non interger buttons presses {buttons_pressed} with {button_presses} and {n_presses} for {system} with {variables_presses}")
-                    n_presses = None
-                    break
-
-                n_presses += round(buttons_pressed)
-
-
-            if n_presses is None or n_presses < 0 or n_presses < max_joltage:
-                continue
-
-            if n_presses == max_joltage:
-                return n_presses
-
-            # DEBUG: process the  number of presses per button and compare to the original systems in debug_systems
-            dbg_systems = [system.copy() for system in self.debug_systems]
-            # self.console.print(dbg_systems)
-            for i, button in enumerate(self.buttons):
-                if i in button_presses:
-                    presses = button_presses[i]
-                else:
-                    presses = variables_presses[i]
-                
-                for system_index, system in enumerate(dbg_systems):
-                    if system[i] != 0:
-                        system[-1] -= system[i] * presses
-                        system[i] = 0
-            
-            for system in dbg_systems:
-                if not is_almost_integral(system[-1], tolerance=0.01):
-                    raise ValueError("Inconsistent system after applying presses.")
-            # self.console.print(dbg_systems)
-            if answer is None:
-                answer = n_presses
-
-            if n_presses < answer:
-                answer = n_presses
-
-
-        # if answer != max_joltage:
-        #     self.console.print(self.debug_systems)
-        #     self.console.print(self.codex)
-        #     self.console.print(f"{answer} vs {max_joltage}")
-        return answer
-
-    async def frame_free_variables(self):
-        # Try to frame the min and max values of each free variables
+    async def mini_maxi_magigua(self):
+        "Magic imbused min-maxer - Try to frame the min and max values of each free variables"
         for variable in self.free_variables:
             # Find if this variable is in one of the above systems
             for i in range(0, min(variable, len(self.codex))):
@@ -515,11 +397,51 @@ class Machine:
                     else:
                         button.set_min_presses(presses)
                 if value < 0 and system.joltage < 0:
-                    presses= ceil(presses)
+                    presses = ceil(presses)
                     if system[system.non_leading_zero] > 0:
                         button.set_min_presses(presses)
                     else:
                         button.set_max_presses(presses)
+
+    async def solve(self):
+        "Duh it solved our problem with the joltage counters"
+        if len(self.free_variables) == 0:
+            return round(sum([button.solution for button in self.buttons if button.solution is not None]))
+
+        max_joltage = self.joltage.maximum_joltage()
+        answer = None
+
+        for presses in self.enumerate_free_variables_presses():
+            variables_presses = {
+                var: presses[i] for i, var in enumerate(self.free_variables)
+            }
+
+            button_presses = {}
+            n_presses = sum(presses)
+            for system in self.codex:
+                buttons_pressed = system.count_presses(variables_presses)
+                button_presses[system.non_leading_zero] = buttons_pressed
+
+                # Remove invalid scenarii
+                if buttons_pressed is None or not is_almost_integral(
+                    buttons_pressed, tolerance=0.01
+                ):
+                    n_presses = None
+                    break
+
+                n_presses += round(buttons_pressed)
+
+            if n_presses is None or n_presses < 0 or n_presses < max_joltage:
+                continue
+            # Early return if we found a solution that can start the machine with the minimun feasible number of presses
+            if n_presses == max_joltage:
+                return n_presses
+            if answer is None:
+                answer = n_presses
+            if n_presses < answer:
+                answer = n_presses
+
+        return answer
 
     def enumerate_free_variables_presses(self) -> Iterable:
         return product(

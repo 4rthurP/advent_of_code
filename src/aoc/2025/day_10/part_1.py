@@ -1,14 +1,12 @@
 import asyncio
 from itertools import batched, permutations
 
-from .commons import AOC2025Day10, Machine
+from .commons import AOC2025Day10, Machine  # ty:ignore[unresolved-import]
 
 
 class AOC2025Day10Part1(AOC2025Day10):
-    # verbose_output = True
     answer = 477
     example_answer = 7
-    skip_puzzle = True
 
     def solve(self):
         return asyncio.run(self.helping_the_elfes())
@@ -32,7 +30,7 @@ class AOC2025Day10Part1(AOC2025Day10):
         for n_pushes in range(1, machine.n_buttons):
             # Simply get the position of the buttons to push
             for permutation in permutations(range(machine.n_buttons), n_pushes):
-                if machine.test_buttons(permutation):
+                if machine.play_with_buttons(permutation):
                     self.log(
                         f"Machine {machine.lights_state} started in {n_pushes} presses: {permutation}"
                     )
