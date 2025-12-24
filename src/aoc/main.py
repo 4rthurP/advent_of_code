@@ -18,15 +18,16 @@ app = typer.Typer(
 )
 
 
-@app.command("aoc")
-def aoc(
-    day: Annotated[int | None, typer.Argument(help="Day of the AoC puzzle")],
+@app.command("solve")
+def solve(
+    day: Annotated[int, typer.Argument(help="Day of the AoC puzzle")],
     *,
     year: Annotated[
         int | None, typer.Option("--year", "-y", help="Year of the AoC puzzle")
     ] = None,
 ) -> None:
     """Run the given AOC puzzle."""
+    year = year or services.get_config("year")
     aoc = AOCDay(day, year)
     if not aoc.is_ready:
         console.print(f"[red]❌ {aoc.error_msg}[/red]")
@@ -46,13 +47,38 @@ def create(
     ] = None,
 ) -> None:
     """Create the structure for a new AOC puzzle."""
+    year = year or services.get_config("year")
     response, message = services.create_aoc_puzzle(day, year, n_parts)
     if response:
         console.print(f"[green]✅ {message}[/green]")
     else:
         console.print(f"[red]❌ {message}[/red]")
 
-
+@app.command("config")
+def config(
+    key: Annotated[
+        str, typer.Argument(help="Configuration key to set or get")
+    ],
+    value: Annotated[
+        str | None,
+        typer.Option(
+            "--value", "-v", help="Value to set for the configuration key"
+        ),
+    ] = None,
+) -> None:
+    """Get or set configuration values."""
+    if value is not None:
+        set = services.set_config(key, value)
+        if set is None:
+            console.print(f"[red]❌ Failed to set configuration key '{key}'[/red]")
+            return
+        console.print(f"[green]✅ Set {key} to {set}[/green]")
+    else:
+        current_value = services.get_config(key)
+        if current_value is not None:
+            console.print(f"[blue]ℹ️ {key} = {current_value}[/blue]")
+        else:
+            console.print(f"[red]❌ Configuration key '{key}' not found[/red]")
 @app.callback()
 def main(
     *,

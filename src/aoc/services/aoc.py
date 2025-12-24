@@ -1,10 +1,9 @@
 import os
 from pathlib import Path
+from aoc.core.config import load_config
 
 
 def create_aoc_puzzle(day: int, year: int | None = None, parts: int = 2) -> tuple[bool, str]:
-    year = year or int(os.environ.get("CURRENT_YEAR"))
-
     year_folder = Path(__file__).parent.parent / str(year) 
     input_file = year_folder / "inputs" / f"day_{day}.txt"
     example_input_file = year_folder / "inputs" / f"day_{day}_example.txt"
@@ -58,3 +57,11 @@ def create_aoc_puzzle(day: int, year: int | None = None, parts: int = 2) -> tupl
 
     return True, "AOC puzzle structure created successfully."
 
+
+def set_config(key: str, value: str) -> str | None:
+    config = load_config()
+    return config.set(key, value)
+
+def get_config(key: str) -> str | None:
+    config = load_config()
+    return config.get(key)

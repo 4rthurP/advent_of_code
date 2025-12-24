@@ -37,7 +37,7 @@ class AOCPuzzle:
     given_example_answer: any | None = None
 
     def __init__(self, year: int, day: int, part: int):
-        self.year = year or os.environ["CURRENT_YEAR"]
+        self.year = year
         self.day = day
         self.part = part
 

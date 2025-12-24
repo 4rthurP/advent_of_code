@@ -1,3 +1,3 @@
-from aoc.services.aoc import create_aoc_puzzle
+from aoc.services.aoc import create_aoc_puzzle, set_config, get_config
 
-__all__ = ["create_aoc_puzzle"]
+__all__ = ["create_aoc_puzzle", "set_config", "get_config"]
