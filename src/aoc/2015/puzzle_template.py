@@ -1,7 +1,7 @@
-from .commons import AOC2025DayX
+from .commons import AOC2015DayX
 
 
-class AOC2025DayXPartX(AOC2025DayX):
+class AOC2015DayXPartX(AOC2015DayX):
     verbose_output = True
     #answer = 0
     example_answer = 0
